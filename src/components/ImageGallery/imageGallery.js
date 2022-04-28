@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import s from "./ImageGalery.module.css";
 import Loader from "../Loader/loader";
+import Button from "../Button/button";
 
 import ImageGalleryItem from "../ImageGalleryItem/ImageGalleryItem";
 
@@ -16,7 +17,7 @@ class ImageGallery extends Component {
   componentDidUpdate(prevP, prevS) {
     const { value } = this.props;
     const { page } = this.state;
-    if (prevP.value !== value) {
+    if (prevP.value !== value || prevS.page !== page) {
       this.setState({ status: "pending" });
       this.fechApi(value, page);
     }
@@ -24,7 +25,7 @@ class ImageGallery extends Component {
 
   onLoadMore = () => {
     this.setState((prevState) => {
-      return { page: prevState.page++ };
+      return { page: prevState.page + 1 };
     });
   };
 
@@ -45,8 +46,8 @@ class ImageGallery extends Component {
   }
 
   render() {
-    const { cards, status } = this.state;
-
+    const { cards, status, page } = this.state;
+    console.log(page);
     if (status === "idle") {
       return <h1>card</h1>;
     }
@@ -63,6 +64,7 @@ class ImageGallery extends Component {
               largeImageURL={el.largeImageURL}
             />
           ))}
+          <Button onClick={this.onLoadMore} />
         </ul>
       );
     }
