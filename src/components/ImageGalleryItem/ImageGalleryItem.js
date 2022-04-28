@@ -1,8 +1,9 @@
-export default function ImageGalleryItem(params) {
+import s from "./imageGalegyItems.module.css";
+
+export default function ImageGalleryItem({ webformatURL, largeImageURL }) {
   return (
-    <li className="gallery-item">
-      <h2>Foto</h2>
-      <img src="" alt="" />
+    <li className={s.item}>
+      <img src={webformatURL} alt="" />
     </li>
   );
 }

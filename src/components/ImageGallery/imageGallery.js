@@ -1,20 +1,34 @@
 import React, { Component } from "react";
 import axios from "axios";
+import s from "./ImageGalery.module.css";
+import Loader from "../Loader/loader";
 
 import ImageGalleryItem from "../ImageGalleryItem/ImageGalleryItem";
 
 class ImageGallery extends Component {
   state = {
-    ObjApi: null,
+    cards: [],
+    status: "idle",
+    error: null,
+    page: 1,
   };
 
   componentDidUpdate(prevP, prevS) {
-    if (prevP.value !== this.props.value) {
-      this.fechApi(this.props.value);
+    const { value } = this.props;
+    const { page } = this.state;
+    if (prevP.value !== value) {
+      this.setState({ status: "pending" });
+      this.fechApi(value, page);
     }
   }
 
-  fechApi(value = "dog", page = 1) {
+  onLoadMore = () => {
+    this.setState((prevState) => {
+      return { page: prevState.page++ };
+    });
+  };
+
+  fechApi(value, page) {
     const KEY = "26773095-8033af7b4c44df434cdac5aab";
     const per_page = 12;
 
@@ -23,24 +37,38 @@ class ImageGallery extends Component {
         `https://pixabay.com/api/?q=${value}&page=${page}&key=${KEY}&image_type=photo&orientation=horizontal&per_page=${per_page}`
       )
       .then((res) => {
-        console.log(res);
-        return this.setState({ ObjApi: res });
+        const cards = res.data.hits;
+
+        return this.setState({ cards, status: "resolved" });
       })
-      .catch((error) => console.log(error));
+      .catch((error) => this.setState({ status: "rejected", error }));
   }
 
   render() {
-    const { ObjApi } = this.state;
-    // const cards = ObjApi.data.hits;
+    const { cards, status } = this.state;
 
-    console.log(ObjApi);
-    return (
-      <ul className="gallery">
-        {/* {ObjApi.map((el) => (
-          <ImageGalleryItem />
-        ))} */}
-      </ul>
-    );
+    if (status === "idle") {
+      return <h1>card</h1>;
+    }
+    if (status === "pending") {
+      return <Loader />;
+    }
+    if (status === "resolved") {
+      return (
+        <ul className={s.galery}>
+          {cards.map((el) => (
+            <ImageGalleryItem
+              key={el.id}
+              webformatURL={el.webformatURL}
+              largeImageURL={el.largeImageURL}
+            />
+          ))}
+        </ul>
+      );
+    }
+    if (status === "rejected") {
+      <h1>{this.state.error}</h1>;
+    }
   }
 }
 

@@ -1,0 +1,8 @@
+.item{
+width: auto;
+list-style: none;
+}
+
+.item img{
+    max-width: 260px;
+}
