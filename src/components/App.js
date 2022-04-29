@@ -1,14 +1,14 @@
-import React, { Component } from "react";
-import Container from "./container/container";
-import Searchbar from "./Searchbar/searchbar";
-import ImageGallery from "./ImageGallery/imageGallery";
+import React, { Component } from 'react';
+import Container from './container/container';
+import Searchbar from './Searchbar/searchbar';
+import ImageGallery from './ImageGallery/imageGallery';
 
 class App extends Component {
   state = {
-    valueInput: "",
+    valueInput: '',
   };
 
-  onSubmit = (value) => {
+  onSubmit = value => {
     this.setState({ valueInput: value });
   };
 

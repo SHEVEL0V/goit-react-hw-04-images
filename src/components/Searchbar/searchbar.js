@@ -1,36 +1,40 @@
-import React, { Component } from "react";
-import s from "./searchbar.module.css";
+import React, { Component } from 'react';
+import { FiSearch } from 'react-icons/fi';
+import s from './searchbar.module.css';
 
 class Searchbar extends Component {
   state = {
-    value: "",
+    value: '',
   };
 
-  onChange = (e) => {
+  onChange = e => {
     const text = e.currentTarget.value;
     this.setState({
       value: text,
     });
   };
 
-  onSubmit = (e) => {
+  onSubmit = e => {
     e.preventDefault();
-    this.props.onSubmit(this.state.value);
-    this.resetInput();
+    const { value } = this.state;
+    if (value.trim() !== '') {
+      this.props.onSubmit(value);
+      this.resetInput();
+    }
   };
 
   resetInput = () => {
     this.setState({
-      value: "",
+      value: '',
     });
   };
 
   render() {
     return (
-      <header className="searchbar">
-        <form className="form" onSubmit={this.onSubmit}>
+      <header className={s.searchbar}>
+        <form className={s.form} onSubmit={this.onSubmit}>
           <button type="submit" className={s.button}>
-            <span className="button-label">Search</span>
+            <FiSearch />
           </button>
 
           <input
