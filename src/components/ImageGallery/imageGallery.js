@@ -9,19 +9,25 @@ import ImageGalleryItem from "../ImageGalleryItem/ImageGalleryItem";
 class ImageGallery extends Component {
   state = {
     cards: [],
+    cardsAll: [],
     status: "idle",
     error: null,
     page: 1,
   };
 
-  componentDidUpdate(prevP, prevS) {
+  componentDidUpdate(prevProps, prevState) {
     const { value } = this.props;
     const { page } = this.state;
-    if (prevP.value !== value || prevS.page !== page) {
-      this.setState({ status: "pending" });
+
+    if (prevProps.value !== value) {
+      this.setState({ status: "pending", page: 1, cardsAll: [] });
+      this.fechApi(value, page);
+    }
+    if (prevProps.value === value && prevState.page !== page) {
       this.fechApi(value, page);
     }
   }
+  s;
 
   onLoadMore = () => {
     this.setState((prevState) => {
@@ -37,19 +43,24 @@ class ImageGallery extends Component {
       .get(
         `https://pixabay.com/api/?q=${value}&page=${page}&key=${KEY}&image_type=photo&orientation=horizontal&per_page=${per_page}`
       )
-      .then((res) => {
-        const cards = res.data.hits;
-
-        return this.setState({ cards, status: "resolved" });
-      })
+      .then((res) => this.onSetState(res))
       .catch((error) => this.setState({ status: "rejected", error }));
   }
 
+  onSetState = (res) => {
+    console.log(res.data.hits);
+    const cards = res.data.hits;
+    return this.setState((preS) => {
+      const cardsAll = [...preS.cardsAll, ...cards];
+      return { cards, cardsAll, status: "resolved" };
+    });
+    // }
+  };
+
   render() {
-    const { cards, status, page } = this.state;
-    console.log(page);
+    const { cards, cardsAll, status } = this.state;
     if (status === "idle") {
-      return <h1>card</h1>;
+      return <h1>Введіть запит пошуку.</h1>;
     }
     if (status === "pending") {
       return <Loader />;
@@ -57,14 +68,14 @@ class ImageGallery extends Component {
     if (status === "resolved") {
       return (
         <ul className={s.galery}>
-          {cards.map((el) => (
+          {cardsAll.map((el) => (
             <ImageGalleryItem
               key={el.id}
               webformatURL={el.webformatURL}
               largeImageURL={el.largeImageURL}
             />
           ))}
-          <Button onClick={this.onLoadMore} />
+          {cards.length === 12 && <Button onClick={this.onLoadMore} />}
         </ul>
       );
     }
