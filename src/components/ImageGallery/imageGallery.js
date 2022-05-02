@@ -1,92 +1,87 @@
-import React, { Component } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import s from './ImageGalery.module.css';
 import Loader from '../Loader/loader';
 import Button from '../Button/button';
-
+import fechApi from '../fech/fech';
 import ImageGalleryItem from '../ImageGalleryItem/ImageGalleryItem';
 
-class ImageGallery extends Component {
-  state = {
-    cards: [],
-    cardsAll: [],
-    status: 'idle',
-    page: 1,
-  };
+const st = {
+  IDLE: 'idle',
+  PENDING: 'pending',
+  RESOLVED: 'resolved',
+  REJECTED: 'rejected',
+};
+const PAGE = 1;
 
-  componentDidUpdate(prevProps, prevState) {
-    const { value } = this.props;
-    const { page } = this.state;
+export default function ImageGallery({ valueInput }) {
+  const [status, setStatus] = useState(st.IDLE);
+  const [urlList, setUrlList] = useState([]);
+  const [page, setPage] = useState(PAGE);
+  const [total, setTotal] = useState('');
+  const [value, setValue] = useState('');
 
-    if (prevProps.value !== value) {
-      this.setState({ status: 'pending', page: 1, cardsAll: [] });
-      this.fechApi(value, page);
+  useEffect(() => {
+    if (valueInput) {
+      setStatus(st.PENDING);
+      renderList();
+      setValue(valueInput);
+      if (valueInput !== value) {
+        setUrlList([]);
+        setPage(1);
+      }
     }
-    if (prevProps.value === value && prevState.page !== page) {
-      this.fechApi(value, page);
+  }, [valueInput]);
+
+  useEffect(() => {
+    if (urlList.length > 0) setStatus(st.RESOLVED);
+    if (urlList.length === 0) setStatus(st.REJECTED);
+  }, [urlList]);
+
+  useEffect(() => {
+    if (page > 1) {
+      renderList();
     }
+  }, [page]);
+
+  function onLoadMore() {
+    const increment = 1;
+
+    setPage(prePage => prePage + increment);
   }
 
-  onLoadMore = () => {
-    this.setState(prevS => {
-      const incremetPage = 1;
-      return { page: prevS.page + incremetPage };
+  function renderList() {
+    fechApi(valueInput, page).then(res => {
+      setTotal(res.total);
+      setUrlList(preList => [...preList, ...res.hits]);
     });
-  };
-
-  fechApi(value, page) {
-    const KEY = '26773095-8033af7b4c44df434cdac5aab';
-    const per_page = 12;
-
-    axios
-      .get(
-        `https://pixabay.com/api/?q=${value}&page=${page}&key=${KEY}&image_type=photo&orientation=horizontal&per_page=${per_page}`,
-      )
-      .then(res => this.renderCards(res))
-      .catch(error => console.log(error));
   }
 
-  renderCards = res => {
-    const cards = res.data.hits;
-    if (cards.length === 0) {
-      return this.setState({ status: 'rejected' });
-    } else {
-      return this.setState(preS => {
-        const cardsAll = [...preS.cardsAll, ...cards];
-        return { cards, cardsAll, status: 'resolved' };
-      });
-    }
-  };
+  // ******** HML ********************
 
-  render() {
-    const { cards, cardsAll, status } = this.state;
-    if (status === 'idle') {
-      return <h1>Введіть запит пошуку.</h1>;
-    }
-    if (status === 'pending') {
-      return <Loader />;
-    }
-    if (status === 'resolved') {
-      return (
-        <div>
-          <ul className={s.galery}>
-            {cardsAll.map(el => (
-              <ImageGalleryItem
-                key={el.id}
-                webformatURL={el.webformatURL}
-                largeImageURL={el.largeImageURL}
-                tags={el.tags}
-              />
-            ))}
-          </ul>
-          {cards.length === 12 && <Button onClick={this.onLoadMore} />}
-        </div>
-      );
-    }
-    if (status === 'rejected') {
-      return <h1>Результат запиту не знайдений!</h1>;
-    }
+  if (status === 'idle') {
+    return <h1>Введіть запит пошуку.</h1>;
+  }
+  if (status === 'pending') {
+    return <Loader />;
+  }
+  if (status === 'resolved') {
+    return (
+      <div>
+        <ul className={s.galery}>
+          {urlList.map(el => (
+            <ImageGalleryItem
+              key={el.id}
+              webformatURL={el.webformatURL}
+              largeImageURL={el.largeImageURL}
+              tags={el.tags}
+            />
+          ))}
+        </ul>
+        {total !== urlList.length && <Button onClick={onLoadMore} />}
+      </div>
+    );
+  }
+  if (status === 'rejected') {
+    return <h1>Результат запиту не знайдений!</h1>;
   }
 }
-
-export default ImageGallery;
