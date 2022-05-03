@@ -39,30 +39,35 @@ export default function ImageGallery({ valueInput }) {
 
   function renderList() {
     setStatus(st.PENDING);
-    fechApi(valueInput, page).then(res => {
-      setTotal(res.total);
-      setUrlList(preList => [...preList, ...res.hits]);
-      setStatus(st.RESOLVED);
-    });
+    fechApi(valueInput, page)
+      .then(res => {
+        setTotal(res.total);
+        setUrlList(preList => [...preList, ...res.hits]);
+        setStatus(st.RESOLVED);
+        if (res.hits.length === 0) {
+          setStatus(st.REJECTED);
+        }
+      })
+      .catch(e => setStatus(st.REJECTED));
   }
 
-  // ******** HML ********************
+  // ******** JSX ********************
 
   return (
     <div>
       {status === 'idle' && <h1>Введіть запит пошуку.</h1>}
-      {
-        <ul className={s.galery}>
-          {urlList.map(el => (
-            <ImageGalleryItem
-              key={el.id}
-              webformatURL={el.webformatURL}
-              largeImageURL={el.largeImageURL}
-              tags={el.tags}
-            />
-          ))}
-        </ul>
-      }
+
+      <ul className={s.galery}>
+        {urlList.map(el => (
+          <ImageGalleryItem
+            key={el.id}
+            webformatURL={el.webformatURL}
+            largeImageURL={el.largeImageURL}
+            tags={el.tags}
+          />
+        ))}
+      </ul>
+
       {status === 'resolved' && total !== urlList.length && <Button onClick={onLoadMore} />}
       {status === 'pending' && <Loader />}
       {status === 'rejected' && <h1>Результат запиту не знайдений!</h1>}
