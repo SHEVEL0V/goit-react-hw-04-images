@@ -27,7 +27,7 @@ export default function ImageGallery({ valueInput }) {
     }
     if (value !== valueInput) {
       setUrlList([]);
-      setPage(1);
+      setPage(PAGE);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [valueInput, page]);
