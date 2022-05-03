@@ -22,51 +22,36 @@ export default function ImageGallery({ valueInput }) {
 
   useEffect(() => {
     if (valueInput) {
-      setStatus(st.PENDING);
       renderList();
       setValue(valueInput);
-      if (valueInput !== value) {
-        setUrlList([]);
-        setPage(1);
-      }
     }
-  }, [valueInput]);
-
-  useEffect(() => {
-    if (urlList.length > 0) setStatus(st.RESOLVED);
-    if (urlList.length === 0) setStatus(st.REJECTED);
-  }, [urlList]);
-
-  useEffect(() => {
-    if (page > 1) {
-      renderList();
+    if (value !== valueInput) {
+      setUrlList([]);
+      setPage(1);
     }
-  }, [page]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [valueInput, page]);
 
   function onLoadMore() {
     const increment = 1;
-
     setPage(prePage => prePage + increment);
   }
 
   function renderList() {
+    setStatus(st.PENDING);
     fechApi(valueInput, page).then(res => {
       setTotal(res.total);
       setUrlList(preList => [...preList, ...res.hits]);
+      setStatus(st.RESOLVED);
     });
   }
 
   // ******** HML ********************
 
-  if (status === 'idle') {
-    return <h1>Введіть запит пошуку.</h1>;
-  }
-  if (status === 'pending') {
-    return <Loader />;
-  }
-  if (status === 'resolved') {
-    return (
-      <div>
+  return (
+    <div>
+      {status === 'idle' && <h1>Введіть запит пошуку.</h1>}
+      {
         <ul className={s.galery}>
           {urlList.map(el => (
             <ImageGalleryItem
@@ -77,11 +62,10 @@ export default function ImageGallery({ valueInput }) {
             />
           ))}
         </ul>
-        {total !== urlList.length && <Button onClick={onLoadMore} />}
-      </div>
-    );
-  }
-  if (status === 'rejected') {
-    return <h1>Результат запиту не знайдений!</h1>;
-  }
+      }
+      {status === 'resolved' && total !== urlList.length && <Button onClick={onLoadMore} />}
+      {status === 'pending' && <Loader />}
+      {status === 'rejected' && <h1>Результат запиту не знайдений!</h1>}
+    </div>
+  );
 }
