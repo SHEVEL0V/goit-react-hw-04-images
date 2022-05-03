@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import s from './imageGalegyItems.module.css';
 import Modal from '../Modal/modal';
 
@@ -18,3 +19,9 @@ export default function ImageGalleryItem({ webformatURL, largeImageURL, tags }) 
     </li>
   );
 }
+
+ImageGalleryItem.propTypes = {
+  webformatURL: PropTypes.string.isRequired,
+  largeImageURL: PropTypes.string.isRequired,
+  tags: PropTypes.string.isRequired,
+};
