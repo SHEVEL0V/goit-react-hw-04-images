@@ -3,20 +3,29 @@ import PropTypes from 'prop-types';
 import s from './imageGalegyItems.module.css';
 import Modal from '../Modal/modal';
 
-export default function ImageGalleryItem({ webformatURL, largeImageURL, tags }) {
-  const [showModat, detShowModat] = useState(true);
+export default function ImageGalleryItem({
+  webformatURL,
+  largeImageURL,
+  tags,
+}) {
+  const [showModat, setShowModat] = useState(false);
 
-  const onModal = () => detShowModat(!showModat);
+  const onModal = () => {
+    setShowModat(preShouModal => !preShouModal);
+  };
 
   return (
-    <li onClick={onModal} className={s.item}>
-      {showModat && <img className={s.img} src={webformatURL} alt={tags} />}
-      {!showModat && (
+    <>
+      <li onClick={onModal} className={s.item}>
+        <img className={s.img} src={webformatURL} alt={tags} />
+      </li>
+
+      {showModat && (
         <Modal onClose={onModal}>
           <img src={largeImageURL} alt={tags} />
         </Modal>
       )}
-    </li>
+    </>
   );
 }
 

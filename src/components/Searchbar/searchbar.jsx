@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { FiSearch } from 'react-icons/fi';
+
 import s from './searchbar.module.css';
 
-export default function Searchbar({ submit }) {
+export default function Searchbar({ valueInput }) {
   const [value, setValue] = useState('');
 
   const onSubmit = e => {
     e.preventDefault();
-
     if (value.trim() !== '') {
-      submit(value);
-      setValue('');
+      valueInput(value);
     }
   };
 
@@ -27,10 +27,12 @@ export default function Searchbar({ submit }) {
           autoComplete="off"
           autoFocus
           placeholder="Search images and photos"
-          onChange={e => setValue(e.target.value)}
+          onChange={e => setValue(e.currentTarget.value)}
           value={value}
         />
       </form>
     </header>
   );
 }
+
+Searchbar.propTypes = { valueInput: PropTypes.func.isRequired };
