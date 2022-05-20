@@ -20,50 +20,43 @@ export default function App() {
   const [data, setDate] = useState([]);
   const [page, setPage] = useState(PAGE);
   const [total, setTotal] = useState('');
-  const [valueInput, setValueInput] = useState('');
   const [value, setValue] = useState('');
 
   useEffect(() => {
-    if (valueInput) {
-      renderList();
-      setValue(valueInput);
-    }
+    if (value) {
+      setStatus(st.PENDING);
 
-    if (valueInput !== value) {
-      setDate([]);
-      setPage(PAGE);
+      fechApi(value, page).then(({ hits, total }) => {
+        if (hits.length === 0) {
+          return setStatus(st.REJECTED);
+        }
+
+        const photos = hits.map(({ id, webformatURL, largeImageURL, tags }) => {
+          return { id, webformatURL, largeImageURL, tags };
+        });
+
+        setDate(photosList => [...photosList, ...photos]);
+        setTotal(total);
+        setStatus(st.RESOLVED);
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, valueInput]);
+  }, [page, value]);
 
   const onLoadMore = () => {
     const increment = 1;
     setPage(prevPage => prevPage + increment);
   };
 
-  const renderList = () => {
-    setStatus(st.PENDING);
-
-    fechApi(valueInput, page).then(res => {
-      if (res.hits.length === 0) {
-        return setStatus(st.REJECTED);
-      }
-
-      const filtreData = res.hits.map(
-        ({ id, webformatURL, largeImageURL, tags }) => {
-          return { id, webformatURL, largeImageURL, tags };
-        }
-      );
-      setDate(prevData => [...prevData, ...filtreData]);
-      setStatus(st.RESOLVED);
-      setTotal(res.total);
-    });
+  const handelSearch = value => {
+    setValue(value);
+    setDate([]);
+    setPage(PAGE);
   };
 
   // ******** JSX ********************
   return (
     <Container>
-      <Searchbar valueInput={setValueInput} />
+      <Searchbar handelSearch={handelSearch} />
       <div>
         {status === 'idle' && <h1>Введіть запит пошуку.</h1>}
         <ImageGallery data={data} />

@@ -7,24 +7,20 @@ const modalRoot = document.querySelector('#modal-root');
 
 export default function Modal({ onClose, children }) {
   useEffect(() => {
+    const handleKeyDoun = e => {
+      if (e.code === 'Escape') {
+        onClose();
+      }
+    };
     window.addEventListener('keydown', handleKeyDoun);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
-  useEffect(() => {
     return () => {
       window.removeEventListener('keydown', handleKeyDoun);
     };
-  });
+  }, [onClose]);
 
   function handelBackdropClick(e) {
     if (e.currentTarget === e.target) {
-      onClose();
-    }
-  }
-
-  function handleKeyDoun(e) {
-    if (e.code === 'Escape') {
       onClose();
     }
   }

@@ -4,13 +4,13 @@ import { FiSearch } from 'react-icons/fi';
 
 import s from './searchbar.module.css';
 
-export default function Searchbar({ valueInput }) {
+export default function Searchbar({ handelSearch }) {
   const [value, setValue] = useState('');
 
   const onSubmit = e => {
     e.preventDefault();
     if (value.trim() !== '') {
-      valueInput(value);
+      handelSearch(value);
     }
   };
 
@@ -35,4 +35,4 @@ export default function Searchbar({ valueInput }) {
   );
 }
 
-Searchbar.propTypes = { valueInput: PropTypes.func.isRequired };
+Searchbar.propTypes = { handelSearch: PropTypes.func.isRequired };
